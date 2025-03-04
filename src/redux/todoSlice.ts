@@ -59,5 +59,4 @@ export const selectPendingTodos = (state: { todos: TodoState }) =>
 
 export const { addTodo, toggleTodo, updateTodo, deleteTodo } = todoSlice.actions;
 
-// Persist the reducer
 export default persistReducer(persistConfig, todoSlice.reducer);

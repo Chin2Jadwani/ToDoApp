@@ -8,7 +8,7 @@ export const store = configureStore({
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
-      serializableCheck: false, // Required for AsyncStorage
+      serializableCheck: false,
     }),
 });
 

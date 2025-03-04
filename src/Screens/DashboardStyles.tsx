@@ -80,7 +80,7 @@ export const styles = StyleSheet.create({
     contentContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        flex: 1, // Takes up available space
+        flex: 1,
         gap: moderateScale(10),
     },
     toDoTitle: {
