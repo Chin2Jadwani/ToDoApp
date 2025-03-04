@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import Routes from './src/routes/Routes'
 import Ionicons from 'react-native-vector-icons/Ionicons'
-import { SafeAreaView, StatusBar, useColorScheme } from 'react-native';
+import { PermissionsAndroid, Platform, SafeAreaView, StatusBar, useColorScheme } from 'react-native';
 import { Provider } from 'react-redux';
 import { persistor, store } from './src/redux/store';
 import { PersistGate } from 'redux-persist/integration/react';
@@ -26,6 +26,21 @@ const App = () => {
       },
       created => { },
     );
+  }, []);
+  useEffect(() => {
+    if (Platform.OS == 'android') {
+      PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+      )
+        .then(res => {
+          console.log('res+++++', res);
+          
+        })
+        .catch(err => {
+          console.log(err, 'err');
+        });
+    } else {
+    }
   }, []);
   return (
     <Provider store={store}>
