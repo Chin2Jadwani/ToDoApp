@@ -10,13 +10,22 @@ import { useSelector } from 'react-redux'
 import { allTodos, deleteTodo } from '../redux/todoSlice'
 import { useAppDispatch } from '../redux/hooks'
 import { GroupedTasks, Task } from '../types'
+import moment from 'moment'
 
 const Dashboard = () => {
   const dispatch = useAppDispatch();
   const allTodo = useSelector(allTodos);
+  const [selectedTask, setSelectedTask] = useState<any>(null);
+  const [isModal, setIsModal] = useState(false)
+  const [rowHeights, setRowHeights] = useState<{ [key: string]: number }>({});
+  const handleLayout = (event: any, id: any) => {
+    const { height } = event.nativeEvent.layout;
+    setRowHeights(prev => ({ ...prev, [id]: height }));
+  };
 
   function groupByDueDate(tasks: Task[]): GroupedTasks[] {
     const groupedData: Record<string, GroupedTasks> = {};
+  
     tasks.forEach(task => {
       if (!groupedData[task.dueDate]) {
         groupedData[task.dueDate] = {
@@ -26,15 +35,17 @@ const Dashboard = () => {
       }
       groupedData[task.dueDate].data.push(task);
     });
-
-    return Object.values(groupedData);
+  
+    // Sort groups by date (earliest date first)
+    return Object.values(groupedData).sort((a, b) =>
+      moment(a.dueDate, 'DD/MM/YYYY').toDate().getTime() -
+      moment(b.dueDate, 'DD/MM/YYYY').toDate().getTime()
+    );
   }
-
-  const [isModal, setIsModal] = useState(false)
-  const [rowHeights, setRowHeights] = useState<{ [key: string]: number }>({});
-  const handleLayout = (event: any, id: any) => {
-    const { height } = event.nativeEvent.layout;
-    setRowHeights(prev => ({ ...prev, [id]: height }));
+  
+  const handleEdit = (task: Task) => {
+    setSelectedTask(task);
+    setIsModal(true);
   };
 
   const renderItem = ({ item }: any) => (
@@ -64,7 +75,7 @@ const Dashboard = () => {
     <View style={[styles.hiddenContainer, { height: rowHeights[item?.id] || 50, }]}>
       <TouchableOpacity
         style={[styles.deleteButton, { backgroundColor: Colors.BLUE }]}
-        onPress={() => { }}>
+        onPress={() => { handleEdit(item) }}>
         <Ionicons
           name="pencil-outline"
           size={moderateScale(24)}
@@ -118,7 +129,11 @@ const Dashboard = () => {
       <AddToDoModal visible={isModal}
         closeModal={() => {
           setIsModal(false)
-        }} title='Add To Do' />
+          setSelectedTask(null)
+        }}
+        title={selectedTask ? 'Update Todo' : 'Add To Do'}
+        editTask={selectedTask}
+      />
     </View>
   )
 }

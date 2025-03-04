@@ -1,5 +1,5 @@
 import { Button, StyleSheet, View } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import CustomModal from '../common/CustomModal'
 import { verticalScale } from '../common/styles/Dimensions';
 import { useFormik } from 'formik';
@@ -9,17 +9,27 @@ import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/d
 import DatePicker from '../common/DatePicker';
 import moment from 'moment';
 import { useAppDispatch } from '../redux/hooks';
-import { addTodo } from '../redux/todoSlice';
+import { addTodo, updateTodo } from '../redux/todoSlice';
 interface CustomModalProps {
     visible: boolean;
     closeModal: () => void;
     maxHeight?: any;
     title?: string;
+    editTask?: any;
 }
 const AddToDoModal: React.FC<CustomModalProps> = ({ visible,
-    closeModal, title }) => {
+    closeModal, title, editTask }) => {
     const [date, setDate] = useState(new Date());
     const dispatch = useAppDispatch();
+
+    useEffect(() => {
+        if (editTask) {
+            setFieldValue('title', editTask.title);
+            setFieldValue('details', editTask.details);
+            setFieldValue('dueDate', editTask.dueDate);
+            setDate(moment(editTask.dueDate, 'DD/MM/YYYY').toDate());
+        }
+    }, [editTask]);
 
     const validationSchema = yup.object().shape({
         title: yup.string().trim().required('Title is required'),
@@ -43,11 +53,16 @@ const AddToDoModal: React.FC<CustomModalProps> = ({ visible,
         validationSchema: validationSchema,
         onSubmit: values => {
             const postData = {
+                id: editTask ? editTask.id : '',
                 title: values?.title,
                 details: values?.details,
                 dueDate: values?.dueDate,
             };
-            dispatch(addTodo(postData));
+            if (editTask) {
+                dispatch(updateTodo(postData)); // Update existing todo
+            } else {
+                dispatch(addTodo(postData)); // Add new todo
+            }
             CloseModal();
             console.log(postData, values, 'postData');
         },
@@ -58,8 +73,8 @@ const AddToDoModal: React.FC<CustomModalProps> = ({ visible,
         if (selectedDate) {
             const formattedDate = moment(selectedDate).format('DD/MM/YYYY');
             setDate(selectedDate);
-            setFieldValue('dueDate', formattedDate); // Update formik state
-        }
+            setFieldValue('dueDate', formattedDate);
+          }
     };
 
     const showEndMode = () => {
@@ -103,7 +118,7 @@ const AddToDoModal: React.FC<CustomModalProps> = ({ visible,
                     onPress={showEndMode}
                     label={moment(date).format('DD/MM/YYYY')}
                     labels="Due Date:" />
-                <Button title="Add Todo"
+                <Button title={editTask ? "Update Todo" : "Add Todo"}
                     onPress={() => handleSubmit()}
                     disabled={!values.title.trim() || !values.dueDate}
                 />
