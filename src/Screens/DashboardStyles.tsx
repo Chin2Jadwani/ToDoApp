@@ -14,6 +14,7 @@ export const styles = StyleSheet.create({
         justifyContent: 'space-between',
         paddingHorizontal: horizontalScale(10),
         paddingVertical: verticalScale(5),
+        backgroundColor: Colors.BACKGROUND
     },
     headerText: {
         fontSize: moderateScale(18),
@@ -65,7 +66,6 @@ export const styles = StyleSheet.create({
         borderRadius: moderateScale(10),
     },
     cartItem: {
-        // ...row,
         flexDirection: 'row',
         alignItems: 'center',
         paddingVertical: verticalScale(10),
@@ -110,4 +110,16 @@ export const styles = StyleSheet.create({
         shadowRadius: 4,
         zIndex: 1,
     },
+    noTasksContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: moderateScale(20),
+    },
+    noTasksText: {
+        fontSize: moderateScale(18),
+        color: Colors.BLACK,
+        textAlign: 'center',
+    },
+
 });

@@ -12,6 +12,7 @@ import { useAppDispatch } from '../redux/hooks'
 import { GroupedTasks, Task } from '../types'
 import moment from 'moment'
 import CheckBox from 'react-native-check-box'
+import PushNotification from 'react-native-push-notification'
 
 const Dashboard = () => {
   const dispatch = useAppDispatch();
@@ -43,14 +44,35 @@ const Dashboard = () => {
       moment(b.dueDate, 'DD/MM/YYYY').toDate().getTime()
     );
   }
-  console.log(groupByDueDate(allTodo), 'groupByDueDate');
 
   const handleEdit = (task: Task) => {
     setSelectedTask(task);
     setIsModal(true);
   };
-  const toggleCheck = (taskId: any) => {
-    dispatch(toggleTodo(taskId));
+  const toggleCheck = (task: any) => {
+    dispatch(toggleTodo(task.id));
+    if (task && !task.completed) {
+      PushNotification.localNotification({
+        channelId: "task-channel",
+        title: "Task Completed",
+        message: `You have completed: ${task.title}`,
+        playSound: true,
+        soundName: "default",
+      });
+    }
+  }
+  const handleDelete = (task:any)=>{
+    dispatch(deleteTodo(task.id));
+    if (task) {
+      PushNotification.localNotification({
+        channelId: "task-channel",
+        title: "Task Deleted",
+        message: `You have Deleted: ${task.title}`,
+        playSound: true,
+        soundName: "default",
+      });
+    }
+
   }
   const renderItem = ({ item }: any) => (
     <View
@@ -59,7 +81,7 @@ const Dashboard = () => {
       <View style={styles.contentContainer}>
         <CheckBox
           onClick={() => {
-            toggleCheck(item.id)
+            toggleCheck(item)
           }}
           isChecked={item.completed}
           checkedCheckBoxColor={Colors.BLUE}
@@ -96,7 +118,7 @@ const Dashboard = () => {
 
       <TouchableOpacity
         style={styles.deleteButton}
-        onPress={() => { dispatch(deleteTodo(item.id)); }}>
+        onPress={() => { handleDelete(item) }}>
         <Ionicons
           name="trash-outline"
           size={moderateScale(24)}
@@ -108,7 +130,7 @@ const Dashboard = () => {
   );
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={() => { setIsModal(true) }} activeOpacity={0.7} style={styles.addButton}>
+      <TouchableOpacity onPress={() => { setIsModal(true) }} activeOpacity={0.7} style={[styles.addButton, styles.elevation]}>
         <Ionicons
           name='add-outline'
           size={moderateScale(30)}
@@ -126,17 +148,22 @@ const Dashboard = () => {
           />
         </TouchableOpacity>
       </View>
-      <SwipeListView
-        useSectionList
-        sections={groupByDueDate(allTodo)}
-        keyExtractor={item => item.id}
-        renderItem={renderItem}
-        renderHiddenItem={renderHiddenItem}
-        renderSectionHeader={renderSectionHeader}
-        rightOpenValue={-150}
-        disableRightSwipe
-        contentContainerStyle={{ padding: horizontalScale(10) }}
-      />
+      {allTodo.length > 0 ?
+        <SwipeListView
+          useSectionList
+          sections={groupByDueDate(allTodo)}
+          keyExtractor={item => item.id}
+          renderItem={renderItem}
+          renderHiddenItem={renderHiddenItem}
+          renderSectionHeader={renderSectionHeader}
+          rightOpenValue={-150}
+          disableRightSwipe
+          contentContainerStyle={{ padding: horizontalScale(10) }}
+        />
+        : <View style={styles.noTasksContainer}>
+          <Text style={styles.noTasksText}>No tasks available</Text>
+        </View>}
+
       <AddToDoModal visible={isModal}
         closeModal={() => {
           setIsModal(false)

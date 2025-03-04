@@ -59,12 +59,11 @@ const AddToDoModal: React.FC<CustomModalProps> = ({ visible,
                 dueDate: values?.dueDate,
             };
             if (editTask) {
-                dispatch(updateTodo(postData)); // Update existing todo
+                dispatch(updateTodo(postData));
             } else {
-                dispatch(addTodo(postData)); // Add new todo
+                dispatch(addTodo(postData));
             }
             CloseModal();
-            console.log(postData, values, 'postData');
         },
     });
 
@@ -74,7 +73,7 @@ const AddToDoModal: React.FC<CustomModalProps> = ({ visible,
             const formattedDate = moment(selectedDate).format('DD/MM/YYYY');
             setDate(selectedDate);
             setFieldValue('dueDate', formattedDate);
-          }
+        }
     };
 
     const showEndMode = () => {
@@ -83,6 +82,7 @@ const AddToDoModal: React.FC<CustomModalProps> = ({ visible,
             onChange: onChangeDate,
             mode: 'date',
             is24Hour: true,
+            minimumDate: new Date()
         });
     };
     const CloseModal = () => {
@@ -97,7 +97,7 @@ const AddToDoModal: React.FC<CustomModalProps> = ({ visible,
             title={title}>
             <View style={{ paddingVertical: verticalScale(10) }}>
                 <FormInput
-                    label="Title"
+                    label="Title:"
                     placeholder="Enter todo title..."
                     value={values.title}
                     onChangeText={handleChange('title')}
@@ -106,13 +106,12 @@ const AddToDoModal: React.FC<CustomModalProps> = ({ visible,
                     errorText={errors.title}
                 />
                 <FormInput
-                    label="To Do Detail"
+                    label="To Do Detail:"
                     placeholder="Enter todo details..."
                     value={values.details}
                     onChangeText={handleChange('details')}
                     onBlur={handleBlur('details')}
                     errorText={errors.details}
-                    multiline
                 />
                 <DatePicker
                     onPress={showEndMode}
