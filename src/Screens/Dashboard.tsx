@@ -7,10 +7,11 @@ import { horizontalScale, moderateScale } from '../common/styles/Dimensions'
 import { SwipeListView } from 'react-native-swipe-list-view'
 import AddToDoModal from './AddToDoModal'
 import { useSelector } from 'react-redux'
-import { allTodos, deleteTodo } from '../redux/todoSlice'
+import { allTodos, deleteTodo, toggleTodo } from '../redux/todoSlice'
 import { useAppDispatch } from '../redux/hooks'
 import { GroupedTasks, Task } from '../types'
 import moment from 'moment'
+import CheckBox from 'react-native-check-box'
 
 const Dashboard = () => {
   const dispatch = useAppDispatch();
@@ -25,7 +26,7 @@ const Dashboard = () => {
 
   function groupByDueDate(tasks: Task[]): GroupedTasks[] {
     const groupedData: Record<string, GroupedTasks> = {};
-  
+
     tasks.forEach(task => {
       if (!groupedData[task.dueDate]) {
         groupedData[task.dueDate] = {
@@ -35,30 +36,40 @@ const Dashboard = () => {
       }
       groupedData[task.dueDate].data.push(task);
     });
-  
+
     // Sort groups by date (earliest date first)
     return Object.values(groupedData).sort((a, b) =>
       moment(a.dueDate, 'DD/MM/YYYY').toDate().getTime() -
       moment(b.dueDate, 'DD/MM/YYYY').toDate().getTime()
     );
   }
-  
+  console.log(groupByDueDate(allTodo), 'groupByDueDate');
+
   const handleEdit = (task: Task) => {
     setSelectedTask(task);
     setIsModal(true);
   };
-
+  const toggleCheck = (taskId: any) => {
+    dispatch(toggleTodo(taskId));
+  }
   const renderItem = ({ item }: any) => (
     <View
       style={[styles.cartItem, styles.elevation]}
       onLayout={event => handleLayout(event, item.id)}>
       <View style={styles.contentContainer}>
-        <TouchableOpacity></TouchableOpacity>
+        <CheckBox
+          onClick={() => {
+            toggleCheck(item.id)
+          }}
+          isChecked={item.completed}
+          checkedCheckBoxColor={Colors.BLUE}
+          checkBoxColor={Colors.BLACK}
+        />
         <View>
-          <Text numberOfLines={1} style={styles.toDoTitle}>
+          <Text numberOfLines={1} style={[styles.toDoTitle, item.completed ? { textDecorationLine: 'line-through', color: 'gray' } : {},]}>
             {item.title}
           </Text>
-          <Text numberOfLines={2} style={styles.toDoDetails}>
+          <Text numberOfLines={2} style={[styles.toDoDetails, item.completed ? { textDecorationLine: 'line-through', color: 'gray' } : {},]}>
             {item.details}
           </Text>
         </View>
